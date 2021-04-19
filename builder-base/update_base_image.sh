@@ -28,3 +28,4 @@ else
 fi
 
 ${SCRIPT_ROOT}/../pr-scripts/create_pr.sh eks-distro-prow-jobs 'builder:.*' 'builder:'"$NEW_TAG" *.yaml $DRY_RUN_FLAG
+${SCRIPT_ROOT}/../pr-scripts/create_pr.sh modelrocket-prow-jobs 'builder:.*' 'builder:'"$NEW_TAG" *.yaml $DRY_RUN_FLAG
