@@ -28,7 +28,7 @@ SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
 if [ $REPO = "eks-distro-build-tooling" ] || [ $REPO = "eks-distro" ]; then
     CHANGED_FILE="Tag file"
-elif [ $REPO = "eks-distro-prow-jobs" ]; then
+elif [[ $REPO =~ "prow-jobs" ]]; then
     CHANGED_FILE="Prow jobs"
 fi
 
@@ -41,14 +41,14 @@ else
 fi
 
 COMMIT_MESSAGE="[PR BOT] Update EKS Distro base image tag"
-if [ $REPO = "eks-distro-prow-jobs" ]; then
+if [[ $REPO =~ "prow-jobs" ]]; then
     COMMIT_MESSAGE="[PR BOT] Update builder-base image tag in Prow jobs"
 fi
 
 PR_TITLE="Update base image tag in ${CHANGED_FILE}"
 sed -i "s,in .* with,in ${CHANGED_FILE} with," ${SCRIPT_ROOT}/../pr-scripts/eks_distro_base_pr_body
 PR_BODY=$(cat ${SCRIPT_ROOT}/../pr-scripts/eks_distro_base_pr_body)
-if [ $REPO = "eks-distro-prow-jobs" ]; then
+if [[ $REPO =~ "prow-jobs" ]]; then
     PR_BODY=$(cat ${SCRIPT_ROOT}/../pr-scripts/builder_base_pr_body)
 fi
 PR_BRANCH="image-tag-update"
@@ -57,10 +57,19 @@ cd ${SCRIPT_ROOT}/../../../${ORIGIN_ORG}/${REPO}
 git config --global push.default current
 git config user.name "EKS Distro PR Bot"
 git remote add origin git@github.com:${ORIGIN_ORG}/${REPO}.git
-git remote add upstream https://github.com/${UPSTREAM_ORG}/${REPO}.git
+if [ $REPO = "modelrocket-prow-jobs" ]; then
+    UPSTREAM_URL=git@github.com:${UPSTREAM_ORG}/${REPO}.git
+else
+    UPSTREAM_URL=https://github.com/${UPSTREAM_ORG}/${REPO}.git
+fi
+git remote add upstream $UPSTREAM_URL
 git checkout -b $PR_BRANCH
-git fetch upstream
-git rebase upstream/main
+if [ $REPO = "modelrocket-prow-jobs" ]; then
+    ssh-agent bash -c 'ssh-add /secrets/ssh-secrets/ssh-key; ssh -o StrictHostKeyChecking=no git@github.com; git fetch upstream; git rebase upstream/main'
+else
+    git fetch upstream
+    git rebase upstream/main
+fi
 
 for FILE in $(find ./ -type f -name $FILEPATH); do
     sed -i "s,${OLD_TAG},${NEW_TAG}," $FILE
@@ -75,7 +84,7 @@ git commit -m "$COMMIT_MESSAGE"
 if [ "$DRY_RUN_FLAG" = "--dry-run" ]; then
     exit 0
 fi
-ssh-agent bash -c 'ssh-add /secrets/ssh-secrets/ssh-key; ssh -o StrictHostKeyChecking=no git@github.com; git push -u origin $PR_BRANCH -f'
+git push -u origin $PR_BRANCH -f
 
 gh auth login --with-token < /secrets/github-secrets/token
 
