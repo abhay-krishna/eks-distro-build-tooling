@@ -64,8 +64,12 @@ else
 fi
 git remote add upstream $UPSTREAM_URL
 git checkout -b $PR_BRANCH
-git fetch upstream
-git rebase upstream/main
+if [ $REPO = "modelrocket-prow-jobs" ]; then
+    ssh-agent bash -c 'ssh-add /secrets/ssh-secrets/ssh-key; ssh -o StrictHostKeyChecking=no git@github.com; git fetch upstream; git rebase upstream/main'
+else
+    git fetch upstream
+    git rebase upstream/main
+fi
 
 for FILE in $(find ./ -type f -name $FILEPATH); do
     sed -i "s,${OLD_TAG},${NEW_TAG}," $FILE
@@ -80,7 +84,7 @@ git commit -m "$COMMIT_MESSAGE"
 if [ "$DRY_RUN_FLAG" = "--dry-run" ]; then
     exit 0
 fi
-ssh-agent bash -c 'ssh-add /secrets/ssh-secrets/ssh-key; ssh -o StrictHostKeyChecking=no git@github.com; git push -u origin $PR_BRANCH -f'
+git push -u origin $PR_BRANCH -f
 
 gh auth login --with-token < /secrets/github-secrets/token
 
