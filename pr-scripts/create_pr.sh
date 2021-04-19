@@ -28,7 +28,7 @@ SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
 if [ $REPO = "eks-distro-build-tooling" ] || [ $REPO = "eks-distro" ]; then
     CHANGED_FILE="Tag file"
-elif [ $REPO = "eks-distro-prow-jobs" ]; then
+elif [[ $REPO =~ "prow-jobs" ]]; then
     CHANGED_FILE="Prow jobs"
 fi
 
@@ -41,14 +41,14 @@ else
 fi
 
 COMMIT_MESSAGE="[PR BOT] Update EKS Distro base image tag"
-if [ $REPO = "eks-distro-prow-jobs" ]; then
+if [[ $REPO =~ "prow-jobs" ]]; then
     COMMIT_MESSAGE="[PR BOT] Update builder-base image tag in Prow jobs"
 fi
 
 PR_TITLE="Update base image tag in ${CHANGED_FILE}"
 sed -i "s,in .* with,in ${CHANGED_FILE} with," ${SCRIPT_ROOT}/../pr-scripts/eks_distro_base_pr_body
 PR_BODY=$(cat ${SCRIPT_ROOT}/../pr-scripts/eks_distro_base_pr_body)
-if [ $REPO = "eks-distro-prow-jobs" ]; then
+if [[ $REPO =~ "prow-jobs" ]]; then
     PR_BODY=$(cat ${SCRIPT_ROOT}/../pr-scripts/builder_base_pr_body)
 fi
 PR_BRANCH="image-tag-update"
