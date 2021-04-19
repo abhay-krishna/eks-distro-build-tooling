@@ -84,7 +84,7 @@ git commit -m "$COMMIT_MESSAGE"
 if [ "$DRY_RUN_FLAG" = "--dry-run" ]; then
     exit 0
 fi
-git push -u origin $PR_BRANCH -f
+ssh-agent bash -c 'ssh-add /secrets/ssh-secrets/ssh-key; ssh -o StrictHostKeyChecking=no git@github.com; git push -u origin $PR_BRANCH -f'
 
 gh auth login --with-token < /secrets/github-secrets/token
 
