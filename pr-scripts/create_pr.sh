@@ -57,7 +57,12 @@ cd ${SCRIPT_ROOT}/../../../${ORIGIN_ORG}/${REPO}
 git config --global push.default current
 git config user.name "EKS Distro PR Bot"
 git remote add origin git@github.com:${ORIGIN_ORG}/${REPO}.git
-git remote add upstream https://github.com/${UPSTREAM_ORG}/${REPO}.git
+if [ $REPO = "modelrocket-prow-jobs" ]; then
+    UPSTREAM_URL=git@github.com:${UPSTREAM_ORG}/${REPO}.git
+else
+    UPSTREAM_URL=https://github.com/${UPSTREAM_ORG}/${REPO}.git
+fi
+git remote add upstream $UPSTREAM_URL
 git checkout -b $PR_BRANCH
 git fetch upstream
 git rebase upstream/main
