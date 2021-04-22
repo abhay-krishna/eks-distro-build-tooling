@@ -75,6 +75,11 @@ for FILE in $(find ./ -type f -name $FILEPATH); do
     sed -i "s,${OLD_TAG},${NEW_TAG}," $FILE
     git add $FILE
 done
+if [ $REPO = "eks-distro-prow-jobs" ]; then
+    sed -i "s,${OLD_TAG},${NEW_TAG}," ./BUILDER_BASE_TAG_FILE
+    git add ./BUILDER_BASE_TAG_FILE
+fi
+
 FILES_ADDED=$(git diff --staged --name-only)
 if [ "$FILES_ADDED" = "" ]; then
     exit 0
