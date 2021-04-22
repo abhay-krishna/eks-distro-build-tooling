@@ -40,7 +40,7 @@ local-images:
 .PHONY: images
 images:
 	# Sleeping until buildkit daemon is running on the other container
-	sleep 15
+	sleep 10
 	buildctl \
 		build \
 		--frontend dockerfile.v0 \
