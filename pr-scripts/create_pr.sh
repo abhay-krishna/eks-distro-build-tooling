@@ -76,7 +76,11 @@ for FILE in $(find ./ -type f -name $FILEPATH); do
     git add $FILE
 done
 if [ $REPO = "eks-distro-prow-jobs" ]; then
-    sed -i "s,.*,${NEW_TAG}," ./BUILDER_BASE_TAG_FILE
+    if [ "$DRY_RUN_FLAG" = "--dry-run" ]; then
+        sed -i "s,.*,${PULL_PULL_SHA}," ./BUILDER_BASE_TAG_FILE
+    else
+        sed -i "s,.*,${PULL_BASE_SHA}," ./BUILDER_BASE_TAG_FILE
+    fi
     git add ./BUILDER_BASE_TAG_FILE
 fi
 
