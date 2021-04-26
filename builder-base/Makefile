@@ -26,7 +26,7 @@ remove-generate-attribution:
 .PHONY: local-images
 local-images:
 	# Sleeping until buildkit daemon is running on the other container
-	sleep 10
+	sleep 15
 	buildctl \
 		build \
 		--frontend dockerfile.v0 \
